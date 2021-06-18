@@ -141,7 +141,8 @@ public class ChartContainerWithReferencePoints {
   private void displayFront(String name, String fileName, int objective1, int objective2)
       throws FileNotFoundException {
     ArrayFront front = new ArrayFront(fileName, ",");
-    double[][] data = FrontUtils.convertFrontToArray(front);
+    // double[][] data = FrontUtils.convertFrontToArray(front);
+    double[][] data = front.getMatrix();
     double[] xData = getObjectiveValues(data, objective1);
     double[] yData = getObjectiveValues(data, objective2);
     XYSeries referenceFront = this.frontChart.addSeries(name, xData, yData);
