@@ -3,6 +3,7 @@ package org.uma.jmetal.util;
 import org.uma.jmetal.util.errorchecking.Check;
 
 import java.util.Arrays;
+import java.util.Vector;
 import java.util.stream.IntStream;
 
 /**
@@ -77,6 +78,23 @@ public class NormalizeUtils {
 
     return normalizedMatrix;
   }
+
+  public static double[] normalize(double[] vector) {
+    Check.notNull(vector);
+    Check.notAllZero(vector);
+    Check.notNaN(vector);
+
+    double sumOfSquare = 0;
+
+    for (double e: vector){
+        sumOfSquare += Math.pow(e, 2);
+    }
+
+    for (int i = 0; i < vector.length; ++i){
+        vector[i] /= Math.sqrt(sumOfSquare);
+    }
+    return vector;
+}
 
   /**
    * Normalize the vectors (rows) of bi-dimensional matrix

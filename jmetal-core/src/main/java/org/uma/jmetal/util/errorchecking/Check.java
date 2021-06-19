@@ -2,6 +2,7 @@ package org.uma.jmetal.util.errorchecking;
 
 import org.uma.jmetal.util.errorchecking.exception.*;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -41,6 +42,18 @@ public class Check {
   public static void that(boolean expression, String message) {
     if (!expression) {
         throw new InvalidConditionException(message) ;
+    }
+  }
+
+  public static void notAllZero(double[] vector){
+    if (Arrays.stream(vector).sum() == 0){
+        throw new IllegalArgumentException("Error: vector is full of 0s.");
+    }
+  }
+
+  public static void notNaN(double[] vector){
+    if (Double.isNaN(Arrays.stream(vector).sum())){
+        throw new IllegalArgumentException("Error: vector contains NaN.");
     }
   }
 }
