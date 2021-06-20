@@ -68,7 +68,7 @@ public class MOEAD3DProblemRunner extends AbstractAlgorithmRunner {
             .setMaximumNumberOfReplacedSolutions(2)
             .setNeighborSize(20)
             .setFunctionType(AbstractMOEAD.FunctionType.TCHE)
-            .setDataDirectory("MOEAD_Weights")
+            .setDataDirectory("resources/weightVectorFiles/moead")
             .build();
 
     AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm).execute();
