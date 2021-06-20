@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.security.auth.RefreshFailedException;
+
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.algorithm.multitask.mfeaddra.MFEADDRA;
@@ -15,6 +17,7 @@ import org.uma.jmetal.operator.crossover.impl.DifferentialEvolutionCrossover;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.operator.mutation.impl.PolynomialMutation;
 import org.uma.jmetal.problem.MultiTaskProblem;
+import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.problem.multitask.cec2017.CIHS;
 import org.uma.jmetal.problem.multitask.cec2017.CILS;
 import org.uma.jmetal.problem.multitask.cec2017.CIMS;
@@ -24,12 +27,15 @@ import org.uma.jmetal.problem.multitask.cec2017.NIMS;
 import org.uma.jmetal.problem.multitask.cec2017.PIHS;
 import org.uma.jmetal.problem.multitask.cec2017.PILS;
 import org.uma.jmetal.problem.multitask.cec2017.PIMS;
+import org.uma.jmetal.problem.multitask.cec2017.base.MO;
 import org.uma.jmetal.qualityindicator.impl.InvertedGenerationalDistance;
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 import org.uma.jmetal.solution.mfeadoublesolution.MFEADoubleSolution;
 import org.uma.jmetal.util.AbstractAlgorithmRunner;
+import org.uma.jmetal.util.fileinput.VectorFileUtils;
 
 import static org.uma.jmetal.problem.multitask.cec2017.base.Utils.getParetoFront;
+import static org.uma.jmetal.util.SolutionListUtils.getMatrixWithObjectiveValues;
 
 public class MFEADDRARunner extends AbstractAlgorithmRunner {
 
@@ -41,7 +47,13 @@ public class MFEADDRARunner extends AbstractAlgorithmRunner {
      */
     public static void main(String[] args) throws IOException {
         final int TIMES = 5;
+
         List<MultiTaskProblem<MFEADoubleSolution>> multiTaskProblemList = Arrays.asList(new CIHS(), new CIMS(), new CILS(), new PIHS(), new PIMS(), new PILS(), new NIHS(), new NIMS(), new NILS());
+
+        // List<String> referenceParetoFrontList = new ArrayList<>();
+        // for (MultiTaskProblem<MFEADoubleSolution> p: multiTaskProblemList){
+        //     referenceParetoFrontList.add("/momfo/PF/" + ((MO) p).gethType() + ".pf");
+        // } 
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         long tim[] = new long[multiTaskProblemList.size()];
@@ -93,12 +105,11 @@ public class MFEADDRARunner extends AbstractAlgorithmRunner {
                 System.out.print(run + "\t");
 
                 for (int i = 0; i < multiTasksProblem.getNumberOfTasks(); i++) {
-                    double[][] mat = new double[solutionList.get(i).size()][];
-                    for (int j = 0; j < solutionList.get(i).size(); ++j){
-                        mat[j] = solutionList.get(i).get(j).objectives();
-                    }
-                    double igd = (new InvertedGenerationalDistance(getParetoFront(multiTasksProblem.getTask(i)).getMatrix())).compute(mat);
+                    double igd = (new InvertedGenerationalDistance(getParetoFront(multiTasksProblem.getTask(i)).getMatrix())).compute(getMatrixWithObjectiveValues(solutionList.get(i)));
                     System.out.print(multiTasksProblem.getTask(i).getName() + " = " + form.format(igd) + "\t");
+                    
+
+
                     ave[i] += igd;
                 }
                 System.out.println("\tTime --> " + computingTime);

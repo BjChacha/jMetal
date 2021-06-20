@@ -37,8 +37,8 @@ public abstract class AbstractMultiTaskDoubleProblem
             solution.variables().set(i,
                     mfeaSolution.variables().get(i)
                             * (problem.getBoundsForVariables().get(i).getUpperBound()
-                                    - problem.getBoundsForVariables().get(i).getUpperBound())
-                            + problem.getBoundsForVariables().get(i).getUpperBound());
+                                    - problem.getBoundsForVariables().get(i).getLowerBound())
+                            + problem.getBoundsForVariables().get(i).getLowerBound());
         }
 
         return solution;
