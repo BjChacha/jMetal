@@ -41,6 +41,8 @@ public class MFEADDRAWithMeasureRunner extends AbstractAlgorithmRunner {
      */
     public static void main(String[] args) throws IOException {
         final int TIMES = 1;
+        final int PLOT_UPDATE_PERIOD = 20;
+
         List<MultiTaskProblem<MFEADoubleSolution>> multiTaskProblemList;
         Algorithm<List<MFEADoubleSolution>> algorithm;
         CrossoverOperator crossover;
@@ -84,7 +86,8 @@ public class MFEADDRAWithMeasureRunner extends AbstractAlgorithmRunner {
                         0.8,
                         2,
                         10,
-                        0.1);
+                        0.1,
+                        PLOT_UPDATE_PERIOD);
 
                 ((MFEADDRAMeasures<MFEADoubleSolution>) algorithm).setReferenceFront(referenceFrontPathList.get(index));
 
@@ -92,26 +95,28 @@ public class MFEADDRAWithMeasureRunner extends AbstractAlgorithmRunner {
 
                 CountingMeasure iterationMeasure = (CountingMeasure) measureManager.<Long>getPushMeasure("currentEvaluation");
                 List<BasicMeasure<List<DoubleSolution>>> solutionListMeasure = new ArrayList<>();
-                List<BasicMeasure<Double>> igdMeasure = new ArrayList<>();
+                List<BasicMeasure<Double>> indicatorMeasure = new ArrayList<>();
                 for (int i = 0; i < multiTasksProblem.getNumberOfTasks(); i++){
                     solutionListMeasure.add((BasicMeasure<List<DoubleSolution>>) measureManager.<List<DoubleSolution>>getPushMeasure("currentPopulation_" + i));
-                    igdMeasure.add((BasicMeasure<Double>) measureManager.<Double>getPushMeasure("igd_" + i));
+                    indicatorMeasure.add((BasicMeasure<Double>) measureManager.<Double>getPushMeasure("indicator_" + i));
                 }
 
-                ChartContainer chart = new ChartContainer(algorithm.getName(), 100);
-                // TODO: 这里只打印第一个子任务
-                chart.setFrontChart(0, 1, referenceFrontPathList.get(index).get(0), "\\s");
-                chart.addIndicatorChart("IGD");
-                chart.initChart();
+                ChartContainer[] charts = new ChartContainer[multiTasksProblem.getNumberOfTasks()];
+                for (int k = 0; k < multiTasksProblem.getNumberOfTasks(); k++){
+                    charts[k] = new ChartContainer(algorithm.getName(), 100);
+                    charts[k].setFrontChart(0, 1, referenceFrontPathList.get(index).get(k), "\\s");
+                    charts[k].addIndicatorChart("NormHV");
+                    charts[k].initChart();
 
-                // TODO: 这里只打印第一个子种群
-                solutionListMeasure.get(0).register(new ChartListener(chart));
-                iterationMeasure.register(new IterationListener(chart));
-                igdMeasure.get(0).register(new IndicatorListener("IGD", chart));
-
+                    solutionListMeasure.get(k).register(new ChartListener(charts[k]));
+                    iterationMeasure.register(new IterationListener(charts[k]));
+                    indicatorMeasure.get(k).register(new IndicatorListener("NormHV", charts[k]));
+                }
                 AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm).execute();
-                chart.saveChart("./chart", BitmapFormat.PNG);
 
+                for (int k = 0; k < multiTasksProblem.getNumberOfTasks(); k++){
+                    charts[k].saveChart("./chart", BitmapFormat.PNG);
+                }
                 List<MFEADoubleSolution> population = (List<MFEADoubleSolution>) algorithm.getResult();
 
                 long computingTime = algorithmRunner.getComputingTime();
@@ -158,13 +163,13 @@ public class MFEADDRAWithMeasureRunner extends AbstractAlgorithmRunner {
 
         public IterationListener(ChartContainer chart){
             this.chart = chart;
-            this.chart.getChart("IGD").setTitle("Iteration: " + 0);
+            this.chart.getChart("NormHV").setTitle("Iteration: " + 0);
         }
 
         @Override
         synchronized public void measureGenerated(Long iteration){
             if (this.chart != null){
-                this.chart.getChart("IGD").setTitle("Iteration: " + iteration);
+                this.chart.getChart("NormHV").setTitle("Iteration: " + iteration);
             }
         }
     }

@@ -62,9 +62,9 @@ public class NSGAIIMeasures<S extends Solution<?>> extends NSGAII<S> implements 
     solutionListMeasure.push(getPopulation());
 
     if (referenceFront.getNumberOfPoints() > 0) {
-      hypervolumeValue.push(
-              new PISAHypervolume<S>(referenceFront).evaluate(
-                  SolutionListUtils.getNonDominatedSolutions(getPopulation())));
+      double hypervolume = new PISAHypervolume<S>(referenceFront).evaluate(
+        SolutionListUtils.getNonDominatedSolutions(getPopulation()));
+      hypervolumeValue.push(hypervolume);
     }
   }
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.optim.MaxEval;
+import org.netlib.util.booleanW;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.crossover.impl.DifferentialEvolutionCrossover;
@@ -270,16 +271,19 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
         return evaluations >= maxEvaluations;
     }
 
+    protected boolean isPeriodicUpdate(int T){
+        return T != 0 && generation % T == 0;
+    }
+
     @Override
     public void run(){
         initState();
         initProgress();
         while (!isStoppingConditionReached()){
             iteration();
-            updateProgress();
-            
-            // DEBUG
-            System.out.println(generation + ": " + evaluations + "/" + maxEvaluations);
+            if (isPeriodicUpdate(20)) {
+                updateProgress();
+            }
         }
     }
 }

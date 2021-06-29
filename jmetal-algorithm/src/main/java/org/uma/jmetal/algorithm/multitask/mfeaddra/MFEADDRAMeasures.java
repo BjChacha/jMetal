@@ -9,6 +9,8 @@ import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.problem.MultiTaskProblem;
 import org.uma.jmetal.qualityindicator.impl.InvertedGenerationalDistance;
+import org.uma.jmetal.qualityindicator.impl.NormalizedHypervolume;
+import org.uma.jmetal.qualityindicator.impl.hypervolume.impl.PISAHypervolume;
 import org.uma.jmetal.solution.MFEASolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
@@ -24,33 +26,40 @@ import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
 
 @SuppressWarnings("serial")
-public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> extends MFEADDRA<S> implements Measurable {
+public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> extends MFEADDRA<S>
+        implements Measurable {
     protected CountingMeasure evaluationsMeasure;
     protected DurationMeasure durationMeasure;
     protected SimpleMeasureManager measureManager;
 
     protected List<BasicMeasure<List<DoubleSolution>>> solutionListMeasure;
-    protected List<BasicMeasure<Double>> IGDValue; 
+    protected List<BasicMeasure<Double>> indicateValue;
+    // protected List<BasicMeasure<Double>> HVValue;
 
     protected int taskNum;
     protected double[][][] referenceFront;
 
+    private int T;
     private long evaluationIncrement;
 
-    public MFEADDRAMeasures(MultiTaskProblem<S> problem, 
-                            int populationSize, 
-                            int maxIterations,
-                            CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-                            AbstractMOEAD.FunctionType functionType, 
-                            double neighborhoodSelectionProbability,
-                            int maximumNumberOfReplacedSolutions, 
-                            int neighborSize, 
-                            double rmp) {
+    public MFEADDRAMeasures(MultiTaskProblem<S> problem, int populationSize, int maxIterations,
+            CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
+            AbstractMOEAD.FunctionType functionType, double neighborhoodSelectionProbability,
+            int maximumNumberOfReplacedSolutions, int neighborSize, double rmp, int T) {
         super(problem, populationSize, maxIterations, crossoverOperator, mutationOperator, functionType,
                 neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions, neighborSize, rmp);
 
-        taskNum = problem.getNumberOfTasks();
+        this.T = T;
+        this.taskNum = problem.getNumberOfTasks();
         initMeasures();
+    }
+
+    public MFEADDRAMeasures(MultiTaskProblem<S> problem, int populationSize, int maxIterations,
+            CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
+            AbstractMOEAD.FunctionType functionType, double neighborhoodSelectionProbability,
+            int maximumNumberOfReplacedSolutions, int neighborSize, double rmp) {
+        this(problem, populationSize, maxIterations, crossoverOperator, mutationOperator, functionType,
+                neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions, neighborSize, rmp, 20);
     }
 
     @Override
@@ -59,7 +68,7 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
     }
 
     @Override
-    protected void iteration(){
+    protected void iteration() {
         long oldEvaluation = this.evaluations;
         super.iteration();
         evaluationIncrement = this.evaluations - oldEvaluation;
@@ -69,14 +78,16 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
     protected void updateProgress() {
         evaluationsMeasure.increment(evaluationIncrement);
         List<List<DoubleSolution>> multiPopulations = getMultiPopulations();
-        Check.that(taskNum == multiPopulations.size(), "The number of populations is not equal to the number of tasks.");
+        Check.that(taskNum == multiPopulations.size(),
+                "The number of populations is not equal to the number of tasks.");
         Check.notNull(referenceFront);
-        for (int i = 0; i < multiPopulations.size(); i++){
+        for (int i = 0; i < multiPopulations.size(); i++) {
             // 更新种群
             solutionListMeasure.get(i).push(multiPopulations.get(i));
-            // 更新IGD值
-            double igd = new InvertedGenerationalDistance(referenceFront[i]).compute(SolutionListUtils.getMatrixWithObjectiveValues(multiPopulations.get(i)));
-            IGDValue.get(i).push(igd);
+            // 更新指标值
+            // double value = new InvertedGenerationalDistance(referenceFront[i]).compute(SolutionListUtils.getMatrixWithObjectiveValues(multiPopulations.get(i)));
+            double value = new NormalizedHypervolume(referenceFront[i]).compute(SolutionListUtils.getMatrixWithObjectiveValues(multiPopulations.get(i)));
+            indicateValue.get(i).push(value);
         }
     }
 
@@ -97,33 +108,35 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
         evaluationsMeasure = new CountingMeasure(0);
         durationMeasure = new DurationMeasure();
         solutionListMeasure = new ArrayList<>();
-        IGDValue = new ArrayList<>();
-        for (int i = 0; i < taskNum; i++){
+        indicateValue = new ArrayList<>();
+        // HVValue = new ArrayList<>();
+        for (int i = 0; i < taskNum; i++) {
             solutionListMeasure.add(new BasicMeasure<>());
-            IGDValue.add(new BasicMeasure<>());
+            indicateValue.add(new BasicMeasure<>());
+            // HVValue.add(new BasicMeasure<>());
         }
-
 
         measureManager = new SimpleMeasureManager();
         measureManager.setPullMeasure("currentExcutionTime", durationMeasure);
         measureManager.setPullMeasure("currentEvaluation", evaluationsMeasure);
 
         measureManager.setPushMeasure("currentEvaluation", evaluationsMeasure);
-        for (int i = 0; i < taskNum; i++){
-            measureManager.setPushMeasure("igd_" + i, IGDValue.get(i));
+        for (int i = 0; i < taskNum; i++) {
+            measureManager.setPushMeasure("indicator_" + i, indicateValue.get(i));
+            // measureManager.setPushMeasure("hv_" + i, HVValue.get(i));
             measureManager.setPushMeasure("currentPopulation_" + i, solutionListMeasure.get(i));
         }
     }
 
-    private List<List<DoubleSolution>> getMultiPopulations(){
+    private List<List<DoubleSolution>> getMultiPopulations() {
         List<List<DoubleSolution>> solutionList = new ArrayList<>(taskNum);
-            for (int i = 0; i < taskNum; i++) {
-                solutionList.add(new ArrayList<>());
-            }
-            for (int i = 0; i < population.size(); i++) {
-                int skillFactor = population.get(i).getSkillFactor();
-                solutionList.get(skillFactor).add(((List<MFEADoubleSolution>)population).get(i).getSolution(skillFactor));
-            }
+        for (int i = 0; i < taskNum; i++) {
+            solutionList.add(new ArrayList<>());
+        }
+        for (int i = 0; i < population.size(); i++) {
+            int skillFactor = population.get(i).getSkillFactor();
+            solutionList.get(skillFactor).add(((List<MFEADoubleSolution>) population).get(i).getSolution(skillFactor));
+        }
         return solutionList;
     }
 
