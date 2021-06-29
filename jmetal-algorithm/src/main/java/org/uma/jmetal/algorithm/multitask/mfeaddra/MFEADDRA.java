@@ -3,6 +3,7 @@ package org.uma.jmetal.algorithm.multitask.mfeaddra;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.optim.MaxEval;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.crossover.impl.DifferentialEvolutionCrossover;
@@ -17,6 +18,7 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
     protected int rate;
 
     private final String UTILITY = "utility";
+    private int generation;
 
     public MFEADDRA(MultiTaskProblem<S> multiTaskProblem,
                     int populationSize,
@@ -58,52 +60,53 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
                 30);
     }
 
-    @Override
-    public void run() {
-        initWeights();
-        initNeighborhood();
 
-        initPopulation();
-        initIdealPoint();
+    // @Override
+    // public void run() {
+    //     initWeights();
+    //     initNeighborhood();
 
-        int generation = 0;
+    //     initPopulation();
+    //     initIdealPoint();
 
-        do {
-            List<Integer> order = tourSelection(10);
+    //     generation = 0;
 
-            for (int i = 0; i < order.size(); i++) {
-                int subProblemId = order.get(i);
+    //     do {
+    //         List<Integer> order = tourSelection(10);
 
-                int skillFactor = population.get(subProblemId).getSkillFactor();
-                int subproblem = subProblemId % subSize;
+    //         for (int i = 0; i < order.size(); i++) {
+    //             int subProblemId = order.get(i);
 
-                chooseNeighborType();
-                List<S> parents = parentSelection(skillFactor, subproblem);
+    //             int skillFactor = population.get(subProblemId).getSkillFactor();
+    //             int subproblem = subProblemId % subSize;
 
-                ((DifferentialEvolutionCrossover) (CrossoverOperator<?>) crossoverOperator).setCurrentSolution((DoubleSolution) population.get(subProblemId));
-                List<S> children = crossoverOperator.execute(parents);
-                S child = children.get(0);
-                mutationOperator.execute(child);
+    //             chooseNeighborType();
+    //             List<S> parents = parentSelection(skillFactor, subproblem);
 
-                int id = chooseTask(skillFactor);
-                child.setSkillFactor(id);
+    //             ((DifferentialEvolutionCrossover) (CrossoverOperator<?>) crossoverOperator).setCurrentSolution((DoubleSolution) population.get(subProblemId));
+    //             List<S> children = crossoverOperator.execute(parents);
+    //             S child = children.get(0);
+    //             mutationOperator.execute(child);
 
-                multiTaskProblem.evaluate(child);
+    //             int id = chooseTask(skillFactor);
+    //             child.setSkillFactor(id);
 
-                evaluations++;
+    //             multiTaskProblem.evaluate(child);
 
-                updateIdealPoint(child, id);
+    //             evaluations++;
 
-                updateNeighborhood(child, id, subproblem);
-            }
+    //             updateIdealPoint(child, id);
 
-            generation++;
-            if (rate != 0 && generation % rate == 0) {
-                updateUtility();
-            }
+    //             updateNeighborhood(child, id, subproblem);
+    //         }
 
-        } while (evaluations < maxEvaluations);
-    }
+    //         generation++;
+    //         if (rate != 0 && generation % rate == 0) {
+    //             updateUtility();
+    //         }
+
+    //     } while (evaluations < maxEvaluations);
+    // }
 
     private void updateUtility() {
         double f1, f2, uti, delta;
@@ -114,7 +117,10 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
             f1 = fitnessFunction(skillFactor, population.get(n), lambda[skillFactor][subproblem]);
             f2 = fitnessFunction(skillFactor, (S) savedValues.get(n), lambda[skillFactor][subproblem]);
 
-            delta = f2 - f1;
+            // delta = f2 - f1;
+            delta = (f2 - f1) / f2;
+
+
             if (delta > 0.001) {
                 population.get(n).attributes().put(UTILITY, 1.0);
             } else {
@@ -208,5 +214,72 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
     @Override
     public String getDescription() {
         return "A Multiobjective multifactorial optimization algorithm based on decomposition and dynamic resource allocation strategy.";
+    }
+
+    @Override
+    protected void initState() {
+        initWeights();
+        initNeighborhood();
+        initPopulation();
+        initIdealPoint();
+
+        this.generation = 0;
+        this.evaluations = 0;
+    }
+
+    @Override
+    protected void iteration() {
+        List<Integer> order = tourSelection(10);
+        for (int i = 0; i < order.size(); i++) {
+            int subProblemId = order.get(i);
+
+            int skillFactor = population.get(subProblemId).getSkillFactor();
+            int subproblem = subProblemId % subSize;
+
+            chooseNeighborType();
+            List<S> parents = parentSelection(skillFactor, subproblem);
+
+            ((DifferentialEvolutionCrossover) (CrossoverOperator<?>) crossoverOperator).setCurrentSolution((DoubleSolution) population.get(subProblemId));
+            List<S> children = crossoverOperator.execute(parents);
+            S child = children.get(0);
+            mutationOperator.execute(child);
+
+            int id = chooseTask(skillFactor);
+            child.setSkillFactor(id);
+            multiTaskProblem.evaluate(child);
+
+            this.evaluations++;
+            updateIdealPoint(child, id);
+            updateNeighborhood(child, id, subproblem);
+        }
+
+        generation++;
+        if (rate != 0 && generation % rate == 0) {
+            updateUtility();
+        }
+    }
+
+    @Override
+    protected void initProgress() { }
+
+    @Override
+    protected void updateProgress() {}
+
+    @Override
+    protected boolean isStoppingConditionReached() {
+        return evaluations >= maxEvaluations;
+    }
+
+    @Override
+    public void run(){
+        initState();
+        initProgress();
+        while (!isStoppingConditionReached()){
+            iteration();
+            updateProgress();
+            
+            // DEBUG
+            System.out.println(generation + ": " + evaluations + "/" + maxEvaluations);
+        }
     }
 }

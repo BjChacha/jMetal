@@ -148,9 +148,10 @@ public class ArrayFront implements Front {
    * @throws FileNotFoundException
    */
   public ArrayFront(String fileName) throws FileNotFoundException {
-    this(fileName, "\\s+");
-    // this(fileName, ",");
+    // this(fileName, "\\s+");
+    this(fileName, ",");
   }
+
 
   public InputStream createInputStream(String fileName) throws FileNotFoundException {
     InputStream inputStream = getClass().getResourceAsStream(fileName);

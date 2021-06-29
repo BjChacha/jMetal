@@ -4,6 +4,7 @@ import org.knowm.xchart.*;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
+import org.uma.jmetal.solution.mfeadoublesolution.MFEADoubleSolution;
 import org.uma.jmetal.util.legacy.front.impl.ArrayFront;
 import org.uma.jmetal.util.legacy.front.util.FrontUtils;
 
@@ -49,7 +50,11 @@ public class ChartContainer {
     this.setFrontChart(objective1, objective2, null);
   }
 
-  public void setFrontChart(int objective1, int objective2, String referenceFrontFileName)
+  public void setFrontChart(int objective1, int objective2, String referenceFrontFileName) throws FileNotFoundException{
+    this.setFrontChart(objective1, objective2, referenceFrontFileName, ",");
+  }
+
+  public void setFrontChart(int objective1, int objective2, String referenceFrontFileName, String split)
       throws FileNotFoundException {
     this.objective1 = objective1;
     this.objective2 = objective2;
@@ -64,7 +69,7 @@ public class ChartContainer {
         .setMarkerSize(5);
 
     if (referenceFrontFileName != null) {
-      this.displayReferenceFront(referenceFrontFileName);
+      this.displayReferenceFront(referenceFrontFileName, split);
     }
 
     double[] xData = new double[] {0};
@@ -194,9 +199,9 @@ public class ChartContainer {
     }
   }
 
-  private void displayFront(String name, String fileName, int objective1, int objective2)
+  private void displayFront(String name, String fileName, String split, int objective1, int objective2)
       throws FileNotFoundException {
-    ArrayFront front = new ArrayFront(fileName);
+    ArrayFront front = new ArrayFront(fileName, split);
     double[][] data = FrontUtils.convertFrontToArray(front);
     double[] xData = getObjectiveValues(data, objective1);
     double[] yData = getObjectiveValues(data, objective2);
@@ -204,13 +209,18 @@ public class ChartContainer {
     referenceFront.setMarkerColor(Color.red);
   }
 
-  private void displayReferenceFront(String fileName) throws FileNotFoundException {
-    this.displayReferenceFront(fileName, this.objective1, this.objective2);
+  private void displayReferenceFront(String fileName, String split) throws FileNotFoundException {
+    this.displayReferenceFront(fileName, split, this.objective1, this.objective2);
   }
 
   private void displayReferenceFront(String fileName, int objective1, int objective2)
       throws FileNotFoundException {
-    this.displayFront("Reference Front", fileName, objective1, objective2);
+    this.displayFront("Reference Front", fileName, ",", objective1, objective2);
+  }
+
+  private void displayReferenceFront(String fileName, String split, int objective1, int objective2)
+    throws FileNotFoundException {
+    this.displayFront("Reference Front", fileName, split, objective1, objective2);
   }
 
   private double[] getObjectiveValues(double[][] data, int obj) {

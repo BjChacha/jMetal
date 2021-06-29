@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.uma.jmetal.algorithm.multiobjective.moead.util.*;
+import org.math.plot.plotObjects.Base;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
@@ -230,5 +231,34 @@ public abstract class AbstractMFEADDRA<S extends MFEASolution<?, ? extends Solut
     @Override
     public List<S> getResult() {
         return population;
+    }
+
+    public void setPopulationSize(int populationSize){
+        this.populationSize = populationSize;
+    }
+
+    public int getPopulationSize(){
+        return this.populationSize;
+    }
+
+    public List<S> getPopulation(){
+        return this.population;
+    }
+
+    protected abstract void initState();
+    protected abstract void iteration();
+    
+    protected abstract void initProgress();
+    protected abstract void updateProgress();
+    protected abstract boolean isStoppingConditionReached();
+
+    @Override
+    public void run(){
+        initState();
+        initProgress();
+        while (!isStoppingConditionReached()){
+            iteration();
+            updateProgress();
+        }
     }
 }

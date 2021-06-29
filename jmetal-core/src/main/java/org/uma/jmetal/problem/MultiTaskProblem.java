@@ -17,4 +17,3 @@ public interface MultiTaskProblem<S> extends Serializable {
 
     S createSolution();
 }
-
