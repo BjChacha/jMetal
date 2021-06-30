@@ -61,54 +61,6 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
                 30);
     }
 
-
-    // @Override
-    // public void run() {
-    //     initWeights();
-    //     initNeighborhood();
-
-    //     initPopulation();
-    //     initIdealPoint();
-
-    //     generation = 0;
-
-    //     do {
-    //         List<Integer> order = tourSelection(10);
-
-    //         for (int i = 0; i < order.size(); i++) {
-    //             int subProblemId = order.get(i);
-
-    //             int skillFactor = population.get(subProblemId).getSkillFactor();
-    //             int subproblem = subProblemId % subSize;
-
-    //             chooseNeighborType();
-    //             List<S> parents = parentSelection(skillFactor, subproblem);
-
-    //             ((DifferentialEvolutionCrossover) (CrossoverOperator<?>) crossoverOperator).setCurrentSolution((DoubleSolution) population.get(subProblemId));
-    //             List<S> children = crossoverOperator.execute(parents);
-    //             S child = children.get(0);
-    //             mutationOperator.execute(child);
-
-    //             int id = chooseTask(skillFactor);
-    //             child.setSkillFactor(id);
-
-    //             multiTaskProblem.evaluate(child);
-
-    //             evaluations++;
-
-    //             updateIdealPoint(child, id);
-
-    //             updateNeighborhood(child, id, subproblem);
-    //         }
-
-    //         generation++;
-    //         if (rate != 0 && generation % rate == 0) {
-    //             updateUtility();
-    //         }
-
-    //     } while (evaluations < maxEvaluations);
-    // }
-
     private void updateUtility() {
         double f1, f2, uti, delta;
         for (int n = 0; n < populationSize; n++) {
@@ -278,12 +230,8 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
     @Override
     public void run(){
         initState();
-        initProgress();
         while (!isStoppingConditionReached()){
             iteration();
-            if (isPeriodicUpdate(20)) {
-                updateProgress();
-            }
         }
     }
 }

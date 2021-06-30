@@ -34,7 +34,6 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
 
     protected List<BasicMeasure<List<DoubleSolution>>> solutionListMeasure;
     protected List<BasicMeasure<Double>> indicateValue;
-    // protected List<BasicMeasure<Double>> HVValue;
 
     protected int taskNum;
     protected double[][][] referenceFront;
@@ -100,7 +99,14 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
     public void run() {
         durationMeasure.reset();
         durationMeasure.start();
-        super.run();
+        initState();
+        initProgress();
+        while (!isStoppingConditionReached()){
+            iteration();
+            if (isPeriodicUpdate(T)) {
+                updateProgress();
+            }
+        }
         durationMeasure.stop();
     }
 
@@ -123,7 +129,6 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
         measureManager.setPushMeasure("currentEvaluation", evaluationsMeasure);
         for (int i = 0; i < taskNum; i++) {
             measureManager.setPushMeasure("indicator_" + i, indicateValue.get(i));
-            // measureManager.setPushMeasure("hv_" + i, HVValue.get(i));
             measureManager.setPushMeasure("currentPopulation_" + i, solutionListMeasure.get(i));
         }
     }
