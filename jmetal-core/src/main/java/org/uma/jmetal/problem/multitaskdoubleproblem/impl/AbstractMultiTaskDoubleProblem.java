@@ -20,6 +20,7 @@ public abstract class AbstractMultiTaskDoubleProblem
 
         resetting(mfeaSolution);
         mfeaSolution.setSolution(skillFactor, solution);
+        mfeaSolution.setObjectives(solution.objectives());
     }
 
     @Override

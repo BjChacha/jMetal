@@ -6,6 +6,7 @@ import org.uma.jmetal.solution.AbstractMFEASolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 import org.uma.jmetal.solution.mfeadoublesolution.MFEADoubleSolution;
+import org.uma.jmetal.util.errorchecking.Check;
 
 public class DefaultMFEADoubleSolution extends AbstractMFEASolution<Double, DoubleSolution> implements MFEADoubleSolution{
 

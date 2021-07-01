@@ -15,4 +15,6 @@ public interface MFEASolution<T, S> extends Solution<T> {
     S getSolution(int index);
 
     void setSolution(int index, S solution);
+
+    void setObjectives(double[] objecives);
 }

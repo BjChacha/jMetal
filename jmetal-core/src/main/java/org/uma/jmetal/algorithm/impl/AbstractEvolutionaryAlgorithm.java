@@ -37,7 +37,7 @@ public abstract class AbstractEvolutionaryAlgorithm<S, R>  implements Algorithm<
 
   protected abstract boolean isStoppingConditionReached();
 
-  protected abstract  List<S> createInitialPopulation() ;
+  protected abstract List<S> createInitialPopulation() ;
 
   protected abstract List<S> evaluatePopulation(List<S> population);
 

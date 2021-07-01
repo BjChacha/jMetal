@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.uma.jmetal.util.errorchecking.Check;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 public abstract class AbstractMFEASolution<T, S extends Solution<?>> implements MFEASolution<T, S> {
@@ -29,11 +30,15 @@ public abstract class AbstractMFEASolution<T, S extends Solution<?>> implements 
         for (int i = 0; i < numberOfObjectives; ++i) {
             variables.add(null);
         }
+        
+        // For Nondominance Sorting
+        constrains = new double[0];
 
         solutionOfTask = new ArrayList<>(numberOfTasks);
         for (int i = 0; i < numberOfTasks; ++i) {
             solutionOfTask.add(null);
         }
+
     }
 
     @Override
@@ -44,6 +49,13 @@ public abstract class AbstractMFEASolution<T, S extends Solution<?>> implements 
     @Override
     public double[] objectives() {
         return objectives;
+    }
+
+    public void setObjectives(double[] objectives){
+        if (this.objectives != null){
+            Check.that(objectives.length == this.objectives.length, "Error: applied objectives length should be " + this.objectives.length + "but it is " + objectives.length + ".");
+        }
+        this.objectives = objectives;
     }
 
     @Override
