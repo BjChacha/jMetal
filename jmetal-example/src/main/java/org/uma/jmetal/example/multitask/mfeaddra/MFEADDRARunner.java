@@ -43,6 +43,7 @@ public class MFEADDRARunner extends AbstractAlgorithmRunner {
      */
     public static void main(String[] args) throws IOException {
         final int TIMES = 5;
+        
         List<MultiTaskProblem<MFEADoubleSolution>> multiTaskProblemList;
         Algorithm<List<MFEADoubleSolution>> algorithm;
         CrossoverOperator crossover;
