@@ -8,6 +8,7 @@ import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.problem.MultiTaskProblem;
 import org.uma.jmetal.solution.MFEASolution;
 import org.uma.jmetal.solution.Solution;
+import org.uma.jmetal.util.comparator.DominanceComparatorV2;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 public abstract class AbstractMATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends AbstractMultiPopulationEvolutionaryAlgorithm<S, List<List<S>>> {
@@ -43,6 +44,8 @@ public abstract class AbstractMATDE<S extends MFEASolution<?, ? extends Solution
 
         probability = new double[taskNum][taskNum];
         reward = new double[taskNum][taskNum];
+
+        this.comparator = new DominanceComparatorV2<>();
         this.randomGenerator = JMetalRandom.getInstance();
     }
 }

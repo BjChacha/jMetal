@@ -24,11 +24,6 @@ public class MATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends Abs
         }
     }
 
-    public MATDE(MultiTaskProblem<S> problem, int populationSize, int archiveSize, int maxEvaluations, CrossoverOperator<S> crossover1,
-    CrossoverOperator<S> crossover2){
-        this(problem, populationSize, archiveSize, maxEvaluations, crossover1, crossover2, 0.1, 0.8, 0.8, 0.2);
-    }
-
     @Override
     public List<List<S>> getResult() {
         return this.population;
@@ -48,10 +43,10 @@ public class MATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends Abs
     protected void initProgress() {}
 
     @Override
-    protected void updateProgerss() {}
+    protected void updateProgress() {}
 
     @Override
-    protected void initialState() {
+    protected void initState() {
         initPopulation();
 
 
@@ -113,6 +108,7 @@ public class MATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends Abs
                 }
             }else{
                 int assist = findAssistTaskId(k);
+                // int assist = 1 - k;
 
                 double[] pBest = new double[problem.getTask(k).getNumberOfObjectives()];
                 for (int j = 0; j < pBest.length; j++){
@@ -128,6 +124,7 @@ public class MATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends Abs
                     parents.add(population.get(assist).get(r1));
                     parents.add(population.get(k).get(i));
                     S offspring = crossoverOperator2.execute(parents).get(randomGenerator.nextInt(0, 1));
+
                     offspring.setSkillFactor(k);
                     problem.evaluate(offspring);
                     evaluations ++;
@@ -135,7 +132,7 @@ public class MATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends Abs
                     int flag = comparator.compare(offspring, population.get(k).get(i));
                     if (flag < 0){
                         population.get(k).set(i, offspring);
-                    }else{
+                    }else if (flag == 0){
                         offspringList.add(offspring);
                     }
                 }
@@ -168,7 +165,8 @@ public class MATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends Abs
             jointPopulation.addAll(population.get(k));
             jointPopulation.addAll(offspringList);
             RankingAndCrowdingSelection<S> selection = new RankingAndCrowdingSelection<S>(populationSize);
-            population.set(k, selection.execute(jointPopulation));
+            List<S> selectedPopulation = selection.execute(jointPopulation);
+            population.set(k, selectedPopulation);
         }
     }
 
@@ -185,19 +183,17 @@ public class MATDE<S extends MFEASolution<?, ? extends Solution<?>>> extends Abs
             sum += probability[taskId][k];
         }
 
-        // 轮盘赌算法
+        // 轮盘赌
         double s = 0;
         double p = randomGenerator.nextDouble();
         int idx = 0;
-        while (idx < taskId - 1){
+        for (idx = 0; idx < taskNum - 1; idx++){
             if (idx == taskId)
                 continue;
             s += probability[taskId][idx] / sum;
             if (s >= p)
                 break;
-            idx ++;
         }
-
         return idx;
     }
 
