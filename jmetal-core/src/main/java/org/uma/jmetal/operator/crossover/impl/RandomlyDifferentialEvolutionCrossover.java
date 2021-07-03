@@ -68,6 +68,9 @@ public class RandomlyDifferentialEvolutionCrossover implements CrossoverOperator
   private double f_lb;
   private double f_ub;
 
+  private double cr;
+  private double f;
+
   private int numberOfDifferenceVectors = 1;
   private DE_CROSSOVER_TYPE crossoverType = DE_CROSSOVER_TYPE.BIN;
   private DE_MUTATION_TYPE mutationType = DE_MUTATION_TYPE.RAND;
@@ -92,8 +95,10 @@ public class RandomlyDifferentialEvolutionCrossover implements CrossoverOperator
   /**
    * Constructor
    *
-   * @param cr
-   * @param f
+   * @param cr_lb
+   * @param cr_ub
+   * @param f_lb
+   * @param f_ub
    * @param variant
    */
   public RandomlyDifferentialEvolutionCrossover(double cr_lb, double cr_up, double f_lb, double f_up, DE_VARIANT variant) {
@@ -229,11 +234,11 @@ public class RandomlyDifferentialEvolutionCrossover implements CrossoverOperator
 
   /* Getters */
   public double getCr() {
-    return randomGenerator.nextDouble(cr_lb, cr_ub);
+    return this.cr;
   }
 
   public double getF() {
-    return randomGenerator.nextDouble(f_lb, f_ub);
+    return this.f;
   }
 
   public DE_VARIANT getVariant() {
@@ -292,7 +297,8 @@ public class RandomlyDifferentialEvolutionCrossover implements CrossoverOperator
   /** Execute() method */
   @Override
   public List<DoubleSolution> execute(List<DoubleSolution> parentSolutions) {
-    double cr = getCr();
+    updateCr();
+    updateF();
     
     DoubleSolution child = (DoubleSolution) currentSolution.copy();
 
@@ -440,5 +446,13 @@ public class RandomlyDifferentialEvolutionCrossover implements CrossoverOperator
         throw new JMetalException("Invalid differential evolution variant: " + variant);
     }
     return deVariant;
+  }
+
+  private void updateCr(){
+    this.cr = randomGenerator.nextDouble(cr_lb, cr_ub);
+  }
+
+  private void updateF(){
+    this.f = randomGenerator.nextDouble(f_lb, f_ub);
   }
 }

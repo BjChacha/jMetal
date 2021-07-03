@@ -31,6 +31,7 @@ public class RandomlySBXCrossover implements CrossoverOperator<DoubleSolution> {
   private double distributionIndex;
   private double cr_lb;
   private double cr_ub;
+  private double cr;
   private RepairDoubleSolution solutionRepair;
 
   private RandomGenerator<Double> randomGenerator;
@@ -88,7 +89,11 @@ public class RandomlySBXCrossover implements CrossoverOperator<DoubleSolution> {
   /* Getters */
   @Override
   public double getCrossoverProbability() {
-    return randomGenerator2.nextDouble(cr_lb, cr_ub);
+    return this.cr;
+  }
+
+  private void updateCr(){
+    this.cr = randomGenerator2.nextDouble(cr_lb, cr_ub);
   }
 
   public double getDistributionIndex() {
@@ -110,6 +115,8 @@ public class RandomlySBXCrossover implements CrossoverOperator<DoubleSolution> {
   public List<DoubleSolution> execute(List<DoubleSolution> solutions) {
     Check.notNull(solutions);
     Check.that(solutions.size() == 2, "There must be two parents instead of " + solutions.size());
+
+    updateCr();
 
     return doCrossover(getCrossoverProbability(), solutions.get(0), solutions.get(1));
   }
