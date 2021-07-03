@@ -24,8 +24,7 @@ import org.uma.jmetal.util.measure.impl.DurationMeasure;
 import org.uma.jmetal.util.measure.impl.SimpleMeasureManager;
 
 @SuppressWarnings("serial")
-public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> extends MFEADDRA<S>
-        implements Measurable {
+public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> extends MFEADDRA<S> implements Measurable {
     protected CountingMeasure evaluationsMeasure;
     protected DurationMeasure durationMeasure;
     protected SimpleMeasureManager measureManager;
@@ -36,18 +35,19 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
     protected int taskNum;
     protected double[][][] referenceFront;
 
-    private int T;
+    private int updateMeasureCycle;
     private long evaluationIncrement;
 
     public MFEADDRAMeasures(MultiTaskProblem<S> problem, int populationSize, int maxIterations,
             CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
             AbstractMOEAD.FunctionType functionType, double neighborhoodSelectionProbability,
-            int maximumNumberOfReplacedSolutions, int neighborSize, double rmp, int T) {
+            int maximumNumberOfReplacedSolutions, int neighborSize, double rmp, int updateMeasureCycle) {
         super(problem, populationSize, maxIterations, crossoverOperator, mutationOperator, functionType,
                 neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions, neighborSize, rmp);
 
-        this.T = T;
+        this.updateMeasureCycle = updateMeasureCycle;
         this.taskNum = problem.getNumberOfTasks();
+        
         initMeasures();
     }
 
@@ -101,11 +101,15 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
         initProgress();
         while (!isStoppingConditionReached()){
             iteration();
-            if (isPeriodicUpdate(T)) {
+            if (isPeriodicUpdate(updateMeasureCycle)) {
                 updateProgress();
             }
         }
         durationMeasure.stop();
+    }
+
+    protected boolean isPeriodicUpdate(int cycle){
+        return cycle != 0 && generation % cycle == 0;
     }
 
     private void initMeasures() {
@@ -113,11 +117,9 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
         durationMeasure = new DurationMeasure();
         solutionListMeasure = new ArrayList<>();
         indicateValue = new ArrayList<>();
-        // HVValue = new ArrayList<>();
         for (int i = 0; i < taskNum; i++) {
             solutionListMeasure.add(new BasicMeasure<>());
             indicateValue.add(new BasicMeasure<>());
-            // HVValue.add(new BasicMeasure<>());
         }
 
         measureManager = new SimpleMeasureManager();
@@ -152,7 +154,7 @@ public class MFEADDRAMeasures<S extends MFEASolution<?, ? extends Solution<?>>> 
     }
 
     public String getName() {
-        return "MFEA/D-DRA-Manager";
+        return "MFEA/D-DRA-Measure";
     }
 
     @Override

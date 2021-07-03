@@ -3,8 +3,6 @@ package org.uma.jmetal.algorithm.multitask.mfeaddra;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math3.optim.MaxEval;
-import org.netlib.util.booleanW;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.crossover.impl.DifferentialEvolutionCrossover;
@@ -17,9 +15,9 @@ import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends AbstractMFEADDRA<S> {
     protected List<S> savedValues;
     protected int rate;
+    protected int generation;
 
     private final String UTILITY = "utility";
-    private int generation;
 
     public MFEADDRA(MultiTaskProblem<S> multiTaskProblem,
                     int populationSize,
@@ -221,10 +219,6 @@ public class MFEADDRA<S extends MFEASolution<?, ? extends Solution<?>>> extends 
     @Override
     protected boolean isStoppingConditionReached() {
         return evaluations >= maxEvaluations;
-    }
-
-    protected boolean isPeriodicUpdate(int T){
-        return T != 0 && generation % T == 0;
     }
 
     @Override

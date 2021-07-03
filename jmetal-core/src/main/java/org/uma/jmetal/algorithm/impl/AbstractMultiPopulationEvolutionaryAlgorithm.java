@@ -2,8 +2,6 @@ package org.uma.jmetal.algorithm.impl;
 
 import java.util.List;
 
-import javax.management.JMException;
-
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.mutation.MutationOperator;
@@ -18,7 +16,6 @@ public abstract class AbstractMultiPopulationEvolutionaryAlgorithm<S, R> impleme
 
     protected int populationSize;
     protected int taskNum;
-    protected int updateCycle;
 
     protected int evaluations;
     protected int maxEvaluations;
@@ -57,18 +54,18 @@ public abstract class AbstractMultiPopulationEvolutionaryAlgorithm<S, R> impleme
 
     @Override
     public void run(){
-        initialState();
+        initState();
         initProgress();
         while (!isStoppingConditionReached()){
             iteration();
             if (isUpdateConditionReached())
-            updateProgerss();
+            updateProgress();
         }
     }
 
     protected abstract void initProgress();
-    protected abstract void updateProgerss();
-    protected abstract void initialState();
+    protected abstract void updateProgress();
+    protected abstract void initState();
     protected abstract void iteration();
     protected abstract boolean isStoppingConditionReached();
     protected abstract boolean isUpdateConditionReached();

@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.uma.jmetal.algorithm.Algorithm;
-import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.algorithm.multitask.matde.MATDE;
 import org.uma.jmetal.example.AlgorithmRunner;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
@@ -42,8 +41,9 @@ public class MATDERunner extends AbstractAlgorithmRunner{
         CrossoverOperator crossover2;
         List<List<String>> referenceFrontPathList;
 
-        multiTaskProblemList = Arrays.asList(new CIHS(), new CIMS(), new CILS(), new PIHS(), new PIMS(), new PILS(),
-        new NIHS(), new NIMS(), new NILS());
+        multiTaskProblemList = Arrays.asList(new CIHS(), new CIMS(), new CILS(), new PIHS(), new PIMS(), new PILS(), new NIHS(), new NIMS(), new NILS());
+
+        // multiTaskProblemList = Arrays.asList(new CIMS());
 
         referenceFrontPathList = new ArrayList<>();
         for (MultiTaskProblem<MFEADoubleSolution> p : multiTaskProblemList) {

@@ -16,7 +16,7 @@ import org.uma.jmetal.operator.crossover.impl.DifferentialEvolutionCrossover;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.operator.mutation.impl.PolynomialMutation;
 import org.uma.jmetal.problem.MultiTaskProblem;
-import org.uma.jmetal.problem.multitask.cec2017.CIHS;
+import org.uma.jmetal.problem.multitask.cec2017.*;
 import org.uma.jmetal.problem.multitask.cec2017.base.MO;
 import org.uma.jmetal.qualityindicator.QualityIndicator;
 import org.uma.jmetal.qualityindicator.impl.InvertedGenerationalDistance;
@@ -41,7 +41,7 @@ public class MFEADDRAWithMeasureRunner extends AbstractAlgorithmRunner {
      */
     public static void main(String[] args) throws IOException {
         final int TIMES = 1;
-        final int PLOT_UPDATE_PERIOD = 20;
+        final int PLOT_UPDATE_PERIOD = 50;
 
         List<MultiTaskProblem<MFEADoubleSolution>> multiTaskProblemList;
         Algorithm<List<MFEADoubleSolution>> algorithm;
@@ -50,7 +50,7 @@ public class MFEADDRAWithMeasureRunner extends AbstractAlgorithmRunner {
         List<List<String>> referenceFrontPathList;
 
         // multiTaskProblemList = Arrays.asList(new CIHS(), new CIMS(), new CILS(), new PIHS(), new PIMS(), new PILS(), new NIHS(), new NIMS(), new NILS());
-        multiTaskProblemList = Arrays.asList(new CIHS());
+        multiTaskProblemList = Arrays.asList(new CILS());
 
         referenceFrontPathList = new ArrayList<>();
         for (MultiTaskProblem<MFEADoubleSolution> p: multiTaskProblemList){
